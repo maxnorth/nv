@@ -10,7 +10,8 @@
             "request": "launch",
             "mode": "auto",
             "program": "./cmd/main.go",
-            "cwd": "."
+            "cwd": "./example-project",
+            "args": ["--", "zsh"]
         }
     ]
 }

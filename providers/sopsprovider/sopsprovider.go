@@ -1,15 +1,14 @@
-package commandprovider
+package sopsprovider
 
 import "github.com/maxnorth/nv/providers"
 
 type Config struct {
-	Command string
-	Args    []string
+	File string
 }
 
 type provider struct {
-	config Config
-	values map[string]string
+	config   Config
+	jsonData []byte
 }
 
 func New(config Config) providers.Provider {

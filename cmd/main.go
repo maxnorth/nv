@@ -1,74 +1,119 @@
 package main
 
 import (
-	"github.com/maxnorth/nv/providers"
-	commandprovider "github.com/maxnorth/nv/providers/command"
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"syscall"
+
 	"github.com/maxnorth/nv/resolver"
 )
 
-// func main() {
-// 	app := &cli.App{
-// 		Name:      "boom",
-// 		Usage:     "make an explosive entrance",
-// 		UsageText: "whoooop",
-// 		Action: func(c *cli.Context) error {
-
-// 			return nil
-// 		},
-// 		Commands: []*cli.Command{
-// 			{},
-// 		},
-// 	}
-
-// 	if err := app.Run(os.Args); err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
-
 func main() {
-
-	type providerDef struct {
-		Type   string
-		Config any
-	}
-
-	providerDefs := map[string]providerDef{
-		"customfile": {
-			Type: "command",
-			Config: commandprovider.Config{
-				Command: "cat",
-				Args:    []string{"customfile"},
-			},
-		},
-		"vault": {
-			Type: "hashicorp-vault",
-			Config: commandprovider.Config{
-				Command: "cat",
-				Args:    []string{"vaultfile"},
-			},
-		},
-	}
-
-	providers := map[string]providers.Provider{}
-	for providerAlias, providerDef := range providerDefs {
-		switch providerDef.Type {
-		case "command":
-			providers[providerAlias] = commandprovider.New(
-				providerDef.Config.(commandprovider.Config),
-			)
-		case "hashicorp-vault":
-			// TODO: add actual vault provider
-			providers[providerAlias] = commandprovider.New(
-				providerDef.Config.(commandprovider.Config),
-			)
+	var optionArgs []string
+	var commandArgs []string
+	var command string
+	for i, arg := range os.Args {
+		if i == 0 {
+			continue
+		}
+		if command != "" {
+			commandArgs = append(commandArgs, arg)
+		} else if arg == "--" || !strings.HasPrefix(arg, "-") {
+			command = arg
+		} else {
+			optionArgs = append(optionArgs, arg)
 		}
 	}
 
-	for _, provider := range providers {
-		provider.Load()
+	r := resolver.Load()
+	values := r.Resolve()
+
+	if command == "" {
+		printEnv(values, optionArgs)
+		return
+	}
+	if command == "shell" {
+		command = "--"
+		commandArgs = append([]string{os.Getenv("SHELL")}, commandArgs...)
+	}
+	if command == "--" {
+		execCommand(commandArgs)
+		return
 	}
 
-	resolver.Resolve(providers)
+	panic("unrecognized command")
+}
+
+func execCommand(commandArgs []string) {
+	if len(commandArgs) == 0 {
+		panic("command was not provided")
+	}
+
+	command, _ := commandArgs[0], []string{}
+	// if len(commandArgs) > 1 {
+	// 	args = commandArgs[1:]
+	// }
+	fname, err := exec.LookPath(command)
+	if err == nil {
+		fname, err = filepath.Abs(fname)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = syscall.Exec(fname, commandArgs, os.Environ())
+	if err != nil {
+		panic(err)
+	}
+}
+
+func printEnv(values map[string]string, optionArgs []string) {
+	output := "dotenv"
+	for i, arg := range optionArgs {
+		if arg == "-o" || arg == "--output" {
+			if len(optionArgs) > i+1 {
+				output = optionArgs[i+1]
+				break
+			} else {
+				// TODO
+				panic("missing value for --output arg")
+			}
+		}
+	}
+
+	var outputTemplate string
+	switch output {
+	case "yaml":
+		outputTemplate = "%s: \"%s\"\n"
+	case "dotenv":
+		outputTemplate = "%s=%s\n"
+	case "docker":
+		outputTemplate = "--env %s=\"%s\"\n"
+	case "shell":
+		outputTemplate = "export %s=\"%s\"\n"
+	}
+
+	if outputTemplate != "" {
+		for key, value := range values {
+			fmt.Printf(outputTemplate, key, value)
+		}
+		return
+	}
+
+	switch output {
+	case "keys":
+		outputTemplate = "%s\n"
+	}
+
+	if outputTemplate != "" {
+		for key, _ := range values {
+			fmt.Printf(outputTemplate, key)
+		}
+		return
+	}
 }
 
 // replace env vars starting with @
