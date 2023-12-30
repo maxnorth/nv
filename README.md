@@ -1,29 +1,56 @@
-# nv
+# nv - simplified access to external configuration
 
-`nv` is an environment variable loader, similar to `dotenv` but with a few differences:
+The **nv** CLI is a unified interface for loading environment variables from anywhere.
 
-- `nv` is not limited to .env files, it can also load env vars using config and secret management providers like Vault, `sops`, and more
-- nv is a portable CLI tool, not a language dependent library
+It allows you to initialize environment variables with references to values stored in external providers like Vault, and then resolve them to their real values before your app starts.
 
-# Goals
+<!-- GIF of usage here -->
 
-The goals of this project are to:
+## Why use **nv**
 
-- Provide a well-encapsulated abstraction for env variable sourcing that is decoupled from application code
-- Make using secrets in local development easy and secure by default
-- Be a single tool suited to any tech stack and execution environment
+- Decouples applications from config/secret providers, and saves you time writing code to use them
+- Reduces project complexity by providing a single pattern for every environment, workflow, and application
+- Makes using shared secrets in local development easy and secure by default
 
-# How it works
+# Getting started
 
-nv is used to run your applications with environment variables loaded from anywhere you need. It does so by resolving directives stored in environment variables, which are instructions on where to fetch the required value.
+### Installation
+
+### Basic usage
+
+The primary way to use `nv` is as an application launcher. It will execute the provided command with variables loaded into the environment:
+
+```bash
+$ nv -- node dist/main.js   # launch an application with env vars loaded
+```
+
+OR
+
+```bash
+$ nv -- zsh                 # launch a new shell session with env vars loaded
+$ node dist/main.js
+```
+
+### How environment loading works
+
+Environment loading consists of two steps:
+
+1. Load: read environment variables from local .env files, same as `dotenv`
+2. Resolve: check all environment variables for values matching a unique syntax. This syntax specifies a provider and location for a real value - for example: `@vault:kv/my-app/database/password`. `nv` resolves the real value using the provider, then assigns it back to the environment variable.
 
 ```
-$ export MY_SECRET=@vault:kv/secrets/my-secret
-$ nv -- printenv MY_SECRET
-Hello from vault!
+# .env
+DB_PASSWORD=@vault:kv/my-app/database/password
 ```
 
-In this example, `vault` is an alias for a provider defined in a `nv.yaml` file in the current directory.
+```
+$ nv -- printenv | grep DB_PASSWORD
+DB_PASSWORD=This is my DB password stored in vault!
+```
+
+### How providers work
+
+`nv` and its providers are configured in a `nv.yaml` file. `nv` will look for this file in the current working directory by default, and will fail if not found.
 
 ```
 # nv.yaml
@@ -40,3 +67,9 @@ nv comes with built-in support a few common providers. For unsupported cases, yo
 - install it
 
 # Quickstart
+
+# FAQ
+
+- Does my whole team need to adopt nv for me to use it?
+- What if I want to load env vars in a way not supported by a built-in provider?
+- Does it work for every OS?
