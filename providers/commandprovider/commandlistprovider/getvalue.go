@@ -1,13 +1,11 @@
-package hcpvaultsecretsprovider
+package commandlistprovider
 
-import (
-	"errors"
-)
+import "errors"
 
 func (p *provider) GetValue(key string) (string, error) {
 	value, exists := p.values[key]
 	if !exists {
-		return "", errors.New("key not found in vault secrets")
+		return "", errors.New("value not found")
 	}
 
 	return value, nil

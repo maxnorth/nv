@@ -1,4 +1,13 @@
 resolvers:
-  sops: sops -d --extract '["'$0'"]' secrets.enc.yaml
-  vault: vault kv get -field=$1 $0
-  gcloud: gcloud secrets versions access latest --secret $0
+  sops:
+    # command: sops -d --extract '["'$0'"]' secrets.enc.yaml
+    command: |
+      echo 'something: what!!!
+      another: huh'
+    output: yaml
+  op:
+    command: op read op://$0
+    mode: get
+  vault:
+    command: vault kv get -field=$1 $0
+    mode: get

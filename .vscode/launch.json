@@ -10,8 +10,8 @@
             "request": "launch",
             "mode": "auto",
             "program": "./cmd/main.go",
-            "cwd": "./example-project",
-            "args": ["--", "zsh"]
+            "cwd": "./example",
+            "args": ["--", "printenv"]
         }
     ]
 }

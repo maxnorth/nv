@@ -45,12 +45,14 @@ func main() {
 		return
 	}
 
-	panic("unrecognized command")
+	fmt.Println("unrecognized command")
+	os.Exit(1)
 }
 
 func execCommand(commandArgs []string) {
 	if len(commandArgs) == 0 {
-		panic("command was not provided")
+		fmt.Println("command was not provided")
+		os.Exit(1)
 	}
 
 	command, _ := commandArgs[0], []string{}
@@ -66,7 +68,8 @@ func execCommand(commandArgs []string) {
 	}
 	err = syscall.Exec(fname, commandArgs, os.Environ())
 	if err != nil {
-		panic(err)
+		fmt.Printf("failed to run command: %s\n", err)
+		os.Exit(1)
 	}
 }
 
@@ -79,7 +82,8 @@ func printEnv(values map[string]string, optionArgs []string) {
 				break
 			} else {
 				// TODO
-				panic("missing value for --output arg")
+				fmt.Println("missing value for --output arg")
+				os.Exit(1)
 			}
 		}
 	}

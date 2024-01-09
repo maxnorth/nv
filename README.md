@@ -1,24 +1,51 @@
-# nv - simplified access to external configuration
+# nv - clean and secure environment variable management
 
-The **nv** CLI is a unified interface for loading environment variables from anywhere.
+**nv** is a DX-focused environment variable loader that automatically resolves references to external values.
 
-It allows you to initialize environment variables with references to values stored in external providers like Vault, and then resolve them to their real values before your app starts.
+**nv** works as a drop-in replacement for `dotenv`, and allows environment variables to contain references specifying the provider and location of values needed at runtime.
 
-<!-- GIF of usage here -->
+```dotenv
+# .env
+DB_USER=@vault:kv/data/my-service/db/user
+DB_PASSWORD=@vault:kv/data/my-service/db/password
+VENDOR_API_KEY=@vault:kv/data/my-vendor/api-key
 
-## Why use **nv**
+# .env.local
+DB_USER=postgres
+DB_PASSWORD=postgres
+VENDOR_API_KEY=@onepassword:development/vendor/keys/api-key
+```
 
-- Decouples applications from config/secret providers, and saves you time writing code to use them
-- Reduces project complexity by providing a single pattern for every environment, workflow, and application
+Several providers are supported out of the box. Connections use common defaults, or can be configured using an `nv.yaml` file.
+
+```yaml
+# nv.yaml
+resolvers:
+  vault:
+    type: hc-vault
+    host: http://localhost:8200
+  onepassword:
+    type: 1password
+```
+
+**nv** is available as a CLI and as a golang library. Libraries for more languages may be added depending on interest.
+
+## Why use nv
+
+- Decouples applications from config/secret providers, and saves you from writing code to use them
+- Increases project consistency by enabling one solution for every environment, workflow, and application
 - Makes using shared secrets in local development easy and secure by default
+- Results in centralized and self-documenting use of external config providers
 
 # Getting started
 
 ### Installation
 
+<!-- need a solution for distributing the CLI -->
+
 ### Basic usage
 
-The primary way to use `nv` is as an application launcher. It will execute the provided command with variables loaded into the environment:
+`nv` is as an application launcher. It will execute the provided command with variables loaded into the environment:
 
 ```bash
 $ nv -- node dist/main.js   # launch an application with env vars loaded
@@ -35,8 +62,8 @@ $ node dist/main.js
 
 Environment loading consists of two steps:
 
-1. Load: read environment variables from local .env files, same as `dotenv`
-2. Resolve: check all environment variables for values matching a unique syntax. This syntax specifies a provider and location for a real value - for example: `@vault:kv/my-app/database/password`. `nv` resolves the real value using the provider, then assigns it back to the environment variable.
+1. Load: read environment variables from local .env files, like `dotenv` does
+2. Resolve: check all environment variables for value references, for example: `@vault:kv/my-app/database/password`. `nv` resolves the real value using the provider config in `nv.yaml` and rewrites the environment variable.
 
 ```
 # .env

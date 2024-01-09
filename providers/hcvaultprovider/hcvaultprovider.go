@@ -1,13 +1,18 @@
-package commandprovider
+package hcvaultprovider
 
-import "github.com/maxnorth/nv/providers"
+import (
+	"net/http"
+
+	"github.com/maxnorth/nv/providers"
+)
 
 type Config struct {
-	Command string
+	Command []string
 }
 
 type provider struct {
 	config Config
+	client *http.Client
 	values map[string]string
 }
 

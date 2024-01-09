@@ -1,4 +1,4 @@
-package hcpvaultsecretsprovider
+package hcvaultprovider
 
 import (
 	"bytes"
