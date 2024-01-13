@@ -2,26 +2,35 @@ package hcvaultprovider
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
+
+	vault "github.com/hashicorp/vault/api"
 )
 
 func (p *provider) Load() error {
-	p.client = &http.Client{}
+	config := vault.DefaultConfig()
 
-	response, err := p.fetchSecrets()
+	client, err := vault.NewClient(config)
 	if err != nil {
-		return err
+		log.Fatalf("unable to initialize Vault client: %v", err)
 	}
 
-	p.values = map[string]string{}
-	for _, secret := range response.Secrets {
-		p.values[secret.Name] = secret.Version.Value
+	// Authenticate
+	client.SetToken("dev-only-token")
+
+	secret, err := client.KVv2("secret").Get(context.Background(), "my-secret-password")
+	if err != nil {
+		log.Fatalf("unable to read secret: %v", err)
 	}
+
+	log.Print(secret)
 
 	return nil
 }
