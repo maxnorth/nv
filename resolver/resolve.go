@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
@@ -10,8 +11,9 @@ import (
 
 type ValueConfig struct {
 	ProviderAlias string
-	SourceKey     string
-	TargetKey     string
+	ValueUrl      *url.URL
+	ValueUrlRaw   string
+	EnvKey        string
 }
 
 func (r Resolver) Resolve() map[string]string {
@@ -44,15 +46,15 @@ func (r Resolver) Resolve() map[string]string {
 			continue
 		}
 
-		value, err := provider.GetValue(valueConfig.SourceKey)
+		value, err := provider.GetValue(valueConfig.ValueUrlRaw)
 		if err != nil {
-			fmt.Printf("error: no key found for '%s' in provider '%s'\n", valueConfig.SourceKey, valueConfig.ProviderAlias)
+			fmt.Printf("error: no key found for '%s' in provider '%s'\n", valueConfig.ValueUrl, valueConfig.ProviderAlias)
 			os.Exit(1)
 		}
 
-		os.Setenv(valueConfig.TargetKey, value)
+		os.Setenv(valueConfig.EnvKey, value)
 
-		values[valueConfig.TargetKey] = value
+		values[valueConfig.EnvKey] = value
 	}
 
 	return values
@@ -60,27 +62,28 @@ func (r Resolver) Resolve() map[string]string {
 
 func parseValueConfig(rawKeyValue string) (ValueConfig, bool) {
 	rawPair := strings.SplitN(rawKeyValue, "=", 2)
-	targetKey, rawSource := rawPair[0], rawPair[1]
-	if !strings.HasPrefix(rawSource, "@") {
+	envKey, value := rawPair[0], rawPair[1]
+	if !strings.HasPrefix(value, "nv://") {
 		// other format checks, such as allowed chars, should be done
 		return ValueConfig{}, false
 	}
 
-	trimmedSource := strings.TrimPrefix(rawSource, "@")
-	sourcePair := strings.SplitN(trimmedSource, ":", 2)
-
-	providerAlias := sourcePair[0]
-	var sourceKey string
-	if len(sourcePair) == 2 {
-		sourceKey = sourcePair[1]
-	} else {
-		sourceKey = targetKey
+	valueUrl, err := url.Parse(value)
+	if err != nil {
+		fmt.Printf(
+			"url parse error: %s: %s\n",
+			value,
+			err,
+		)
+		os.Exit(1)
+		return ValueConfig{}, false
 	}
 
 	valueConfig := ValueConfig{
-		ProviderAlias: providerAlias,
-		SourceKey:     sourceKey,
-		TargetKey:     targetKey,
+		ProviderAlias: valueUrl.Host,
+		ValueUrlRaw:   value,
+		ValueUrl:      valueUrl,
+		EnvKey:        envKey,
 	}
 
 	return valueConfig, true

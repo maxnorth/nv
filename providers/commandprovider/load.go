@@ -1,4 +1,4 @@
-package commandgetprovider
+package commandprovider
 
 import (
 	"fmt"

@@ -1,6 +1,6 @@
 # Resolvers
 
-Resolvers are used to convert value references to real values, typically by fetching them from an external provider like Vault.
+Resolvers are used to convert references to real values, typically by fetching them from an external provider like Vault.
 
 I want to try using this. How do I?
 I'm going to install it and try running it, see what happens.
@@ -9,29 +9,24 @@ I might end up in the reference if I'm getting more serious about setting this u
 
 ```yaml
 resolvers:
-  [provider-alias]:
-    kind: commmand
-    command: string
-    profiles:
-      default:
-        command: string
-      production:
-        command: string
-      staging:
-        command:
+  name:
+    type: commmand
+    command: echo "EXAMPLE_KEY=example-value"
 ```
 
-```yaml
-command: [string] The shell command to run. Evaluated using `sh`.
-mode: [string] get|list. Defaults to 'list'.
-output: [string] dotenv|yaml|json. Defaults to 'dotenv'.
-```
+### Resolver types
 
-**command** string _required_
-<br/> Here's a description of this thing. Here's a description of this thing. Here's a description of this thing. Here's a description of this thing. Here's a description of this thing. Here's a description of this thing.
+Each resolver definition has a required `type` option specifying which resolver to use. The rest of the options are dependent on the configured `type`.
 
-**mode** string (get|list) _optional_ (default: list)
-<br/> Here's a description of this thing. Here's a description of this thing. Here's a description of this thing. Here's a description of this thing. Here's a description of this thing. Here's a description of this thing.
+- **type** string _required_ (**accepted values**: `command`, `hc-vault`, `sops`)
+  <br/> The command to run. Value pairs will be extracted from stdout and parsed using the format specified in **output**. Will be evaluated using the default shell in `$SHELL`. Supports multi-line scripts.
 
-**output** string (**enum**: dotenv, json, yaml) _optional_ (**default**: dotenv)
-<br/> Here's a description of this thing. Here's a description of this thing. Here's a description of this thing. Here's a description of this thing. Here's a description of this thing.
+#### command
+
+##### Options:
+
+- **run** string _required_
+  <br/> The command to run. Value pairs will be extracted from stdout and parsed using the format specified in **output**. Will be evaluated using the default shell in `$SHELL`. Supports multi-line scripts.
+
+- **output** string _optional_ (**accepted values**: `dotenv`, `json`, `yaml`; **default:** `dotenv`)
+  <br/> The format of the output produced by the command.

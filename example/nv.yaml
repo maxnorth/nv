@@ -1,13 +1,4 @@
 resolvers:
-  sops:
-    # command: sops -d --extract '["'$0'"]' secrets.enc.yaml
-    command: |
-      echo 'something: what!!!
-      another: huh'
-    output: yaml
-  op:
-    command: op read op://$0
-    mode: get
-  vault:
-    command: vault kv get -field=$1 $0
-    mode: get
+  vault: vault kv get -mount="secret" -field=$NV_URL_ARG_FIELD $NV_URL_PATH
+  sops: sops -d --extract $NV_URL_ARG_EXTRACT $NV_URL_PATH
+  1password: op read op://$NV_URL_PATH

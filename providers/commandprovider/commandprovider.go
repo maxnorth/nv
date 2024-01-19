@@ -1,19 +1,17 @@
-package hcvaultprovider
+package commandprovider
 
 import (
-	"net/http"
-
 	"github.com/maxnorth/nv/providers"
 )
 
-type Config struct {
-	Command []string
-}
-
 type provider struct {
 	config Config
-	client *http.Client
-	values map[string]string
+}
+
+type Config struct {
+	Command string
+	Mode    string
+	Output  string
 }
 
 func New(config Config) providers.Provider {

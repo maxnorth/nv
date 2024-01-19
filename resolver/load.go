@@ -10,10 +10,6 @@ import (
 
 	"github.com/maxnorth/nv/providers"
 	"github.com/maxnorth/nv/providers/commandprovider"
-	"github.com/maxnorth/nv/providers/commandprovider/commandgetprovider"
-	"github.com/maxnorth/nv/providers/commandprovider/commandlistprovider"
-	"github.com/maxnorth/nv/providers/hcvaultprovider"
-	"github.com/maxnorth/nv/providers/sopsprovider"
 )
 
 func Load() *Resolver {
@@ -33,7 +29,7 @@ func Load() *Resolver {
 		providerAlias := key.String()
 
 		if value.Type == gjson.String {
-			r.providers[providerAlias] = commandlistprovider.New(commandprovider.Config{
+			r.providers[providerAlias] = commandprovider.New(commandprovider.Config{
 				Command: value.String(),
 			})
 			return true
@@ -50,33 +46,7 @@ func Load() *Resolver {
 			if err := json.Unmarshal([]byte(value.Raw), &config); err != nil {
 				panic(err)
 			}
-			switch config.Mode {
-			case "":
-				fallthrough
-			case "list":
-				r.providers[providerAlias] = commandlistprovider.New(config)
-			case "get":
-				r.providers[providerAlias] = commandgetprovider.New(config)
-			default:
-				fmt.Printf(
-					"nv.yaml error: command resolver '%s' has unrecognized mode '%s'\n",
-					providerAlias,
-					providerType,
-				)
-				os.Exit(1)
-			}
-		case "hc-vault":
-			var config hcvaultprovider.Config
-			if err := json.Unmarshal([]byte(value.Raw), &config); err != nil {
-				panic(err)
-			}
-			r.providers[providerAlias] = hcvaultprovider.New(config)
-		case "sops":
-			var config sopsprovider.Config
-			if err := json.Unmarshal([]byte(value.Raw), &config); err != nil {
-				panic(err)
-			}
-			r.providers[providerAlias] = sopsprovider.New(config)
+			r.providers[providerAlias] = commandprovider.New(config)
 		default:
 			fmt.Printf(
 				"nv.yaml error: resolver '%s' has unrecognized provider '%s'\n",

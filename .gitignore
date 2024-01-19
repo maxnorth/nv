@@ -1,3 +1,7 @@
 /bin
 
 .env.local
+
+.DS_STORE
+
+__debug_*

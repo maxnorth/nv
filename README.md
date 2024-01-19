@@ -1,19 +1,21 @@
-# nv - clean and secure environment variable management
+# nv - Environment variables with reach
 
-**nv** is a DX-focused environment variable loader that automatically resolves references to external values.
+**nv** is an environment variable loader and URL resolver. It was created to improve the developer experience of working with secret providers.
 
-**nv** works as a drop-in replacement for `dotenv`, and allows environment variables to contain references specifying the provider and location of values needed at runtime.
+## How it works
+
+**nv** allows environment variables to contain special URL's that locate values and automatically resolves them at runtime. It also runs the `dotenv` loader so you can keep values in `.env` files.
 
 ```dotenv
 # .env
-DB_USER=@vault:kv/data/my-service/db/user
-DB_PASSWORD=@vault:kv/data/my-service/db/password
-VENDOR_API_KEY=@vault:kv/data/my-vendor/api-key
+DB_USER=nv://vault/kv/data/my-service?field=db-user
+DB_PASSWORD=nv://vault/kv/data/my-service?field=db-password
+VENDOR_API_KEY=nv://vault/kv/data/my-service?field=vendor-key
 
 # .env.local
 DB_USER=postgres
 DB_PASSWORD=postgres
-VENDOR_API_KEY=@onepassword:development/vendor/keys/api-key
+VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key
 ```
 
 Several providers are supported out of the box. Connections use common defaults, or can be configured using an `nv.yaml` file.
@@ -28,7 +30,7 @@ resolvers:
     type: 1password
 ```
 
-**nv** is available as a CLI and as a golang library. Libraries for more languages may be added depending on interest.
+**nv** is designed to be usable purely as a CLI, but it is also available as a golang library. Libraries for more languages may be added depending on interest.
 
 ## Why use nv
 
