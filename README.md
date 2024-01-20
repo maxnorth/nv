@@ -1,10 +1,10 @@
 # nv - Enviably simple app configuration
 
-**nv** is a dotenv-style environment variable loader that makes secret managers easier to work with. No more copying secrets to developer machines or bending [12FA principles](https://12factor.net/config) by tightly coupling to secret managers.
+**nv** is a dotenv-style environment variable loader that makes secret managers easier to work with. No more copying secrets to developer machines or bending [12FA principles](https://12factor.net/config) by tightly coupling services to secret managers.
 
 ## Intro
 
-**nv** looks for environment variables containing `nv://` URL's and automatically resolves them to a value. It first runs the `dotenv` loader so you can manage values by environment in `.env` files.
+**nv** looks for environment variables containing `nv://` URL's and automatically resolves them to a value. It also runs the `dotenv` loader so you can manage values by environment in `.env` files.
 
 ```dotenv
 # .env
@@ -13,15 +13,15 @@ VENDOR_API_KEY=nv://vault/kv/data/my-service?field=vendor-key
 ```
 
 ```
-# .env.local
-DB_PASSWORD=postgres # easily override locally with static values
-VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key # or use a different manager
+# .env.local - easily override with static values or other managers
+DB_PASSWORD=postgres
+VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key
 ```
 
 These URLs are matched to **resolvers**, commands that **nv** runs to obtain a value for the URL, which you define in `nv.yaml`.
 
 ```yaml
-# NV_URL_* variables are made available to access parts of the URL
+# NV_URL_* env vars are provided to access parts of the URL
 resolvers:
   vault: vault kv get -mount="secret" -field=$NV_URL_ARG_FIELD $NV_URL_PATH
   sops: sops -d --extract $NV_URL_ARG_EXTRACT $NV_URL_PATH
@@ -32,11 +32,11 @@ The primary `nv` commands are **run** and **print**.
 
 ```bash
 $ nv run -- npm start           # run a command with env vars loaded and resolved.
-$ nv -- npm start               # 'run' is the default and can be dropped if '--' is present.
+$ nv -- npm start               # 'run' is the default and can be skipped for convenience.
 $ nv -- zsh                     # it can be handy to start a shell session with vars loaded.
-$ nv --env staging -- zsh       # run with a targeted environment.
+$ nv -e staging -- zsh          # run using a targeted environment.
 
-$ nv print                      # resolve and print loaded values to inspect them.
+$ nv print                      # load, resolve, and print values for inspection.
 DB_PASSWORD=hello-from-vault!
 VENDOR_API_KEY=hello-again!
 $ nv print --output json        # print in json or yaml for easy parsing by applications.
