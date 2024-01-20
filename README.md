@@ -1,6 +1,6 @@
 # nv - Enviably simple app configuration
 
-**nv** is a dotenv-style environment variable loader that makes secret managers easier to work with. No more copying secrets to developer machines or bending [12FA principles](https://12factor.net/config) with tight couplings to secret managers.
+**nv** is a dotenv-style environment variable loader that makes secret managers easier to work with. No more copying secrets to developer machines or bending [12FA principles](https://12factor.net/config) by tightly coupling to secret managers.
 
 ## Intro
 
@@ -10,16 +10,18 @@
 # .env
 DB_PASSWORD=nv://vault/kv/data/my-service?field=db-password
 VENDOR_API_KEY=nv://vault/kv/data/my-service?field=vendor-key
-
-# .env.local
-DB_PASSWORD=postgres # easily override locally with static values
-VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key # or pull from a different manager
 ```
 
-These URLs are matched to **resolvers** by their host segment. Resolvers are custom commands that **nv** runs to obtain a value for the URL, which you define in `nv.yaml`.
+```
+# .env.local
+DB_PASSWORD=postgres # easily override locally with static values
+VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key # or use a different manager
+```
+
+These URLs are matched to **resolvers**, commands that **nv** runs to obtain a value for the URL, which you define in `nv.yaml`.
 
 ```yaml
-# $NV_URL_* variables are made available to access parts of the URL
+# NV_URL_* variables are made available to access parts of the URL
 resolvers:
   vault: vault kv get -mount="secret" -field=$NV_URL_ARG_FIELD $NV_URL_PATH
   sops: sops -d --extract $NV_URL_ARG_EXTRACT $NV_URL_PATH
