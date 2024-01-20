@@ -1,6 +1,6 @@
-# nv - Environment variables with reach
+# nv - Enviably simple app configuration
 
-**nv** is an environment variable loader and URL resolver. It aims to fulfill an unmet promise of secret managers, which should make it **easy** to use application secrets **securely** in all environments, especially in local development.
+**nv** is a dotenv-style environment variable loader that makes secret managers easier to work with. No more copying secrets to developer machines or bending [12FA principles](https://12factor.net/config) with tight couplings to secret managers.
 
 - How it works
 - Installation
@@ -10,47 +10,39 @@
 
 ## How it works
 
-**nv** looks for environment variables containing special URL's that locate values and automatically resolves them at runtime. It also runs the `dotenv` loader so you can keep values in `.env` files and easily manage differences in environments.
+**nv** looks for environment variables containing `nv://` URL's and automatically resolves them to a value. It first runs the `dotenv` loader so you can manage values by environment in `.env` files.
 
 ```dotenv
 # .env
-DB_USER=nv://vault/kv/data/my-service?field=db-user
 DB_PASSWORD=nv://vault/kv/data/my-service?field=db-password
 VENDOR_API_KEY=nv://vault/kv/data/my-service?field=vendor-key
 
 # .env.local
-DB_USER=postgres
-DB_PASSWORD=postgres
-VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key
+DB_PASSWORD=postgres # easily override locally with static values
+VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key # or pull from a different manager
 ```
 
-Resolvers allow `nv` to obtain values for a URL. You define them in a `nv.yaml` file typically kept at the root of the project.
+These URLs are matched to **resolvers** by their host segment. Resolvers are custom commands that **nv** runs to obtain a value for the URL, which you define in `nv.yaml`.
 
 ```yaml
+# $NV_URL_* variables are made available to access parts of the URL
 resolvers:
   vault: vault kv get -mount="secret" -field=$NV_URL_ARG_FIELD $NV_URL_PATH
   sops: sops -d --extract $NV_URL_ARG_EXTRACT $NV_URL_PATH
   1password: op read op://$NV_URL_PATH
 ```
 
-**nv** is designed to be usable purely as a CLI. There are two essential `nv` commands, **run** and **print**.
+There are two essential `nv` commands, **run** and **print**.
 
 ```bash
 $ nv run -- node dist/main.js   # run a command with env vars loaded and resolved.
 $ nv -- node dist/main.js       # 'run' is the default and can be dropped if '--' is present.
 $ nv -- zsh                     # conveniently start a shell session with vars loaded.
-$ exit                          # exit when done to reset variables.
-$ nv -p staging -- zsh          # then load values for a different environment instead.
-```
+$ exit                          # exit the session to reset variables.
+$ nv --env staging -- zsh       # start a session for a targeted environment.
 
-```bash
-$ nv print      # resolve and print all values loaded from .env files
-
-$ nv print -o json
-
-$ nv -- zsh                   # a convenient local dev pattern is to start a shell with vars loaded
-
-$ nv -p staging -- zsh        # or start a shell with values for a different environment instead
+$ nv print                      # resolve and print values to inspect them.
+$ nv print --output json        # print in json or yaml for easy parsing by applications.
 ```
 
 The CLI approach allows `nv` to be used in any runtime environment and any language or tech stack. This also makes it usable with software you don't own the code for.
