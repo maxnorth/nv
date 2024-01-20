@@ -39,6 +39,7 @@ $ nv -e staging -- zsh          # run using a targeted environment.
 $ nv print                      # load, resolve, and print values for inspection.
 DB_PASSWORD=hello-from-vault!
 VENDOR_API_KEY=hello-again!
+
 $ nv print --output json        # print in json or yaml for easy parsing by applications.
 {
   "DB_PASSWORD": "hello-from-vault!",
