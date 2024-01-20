@@ -2,13 +2,7 @@
 
 **nv** is a dotenv-style environment variable loader that makes secret managers easier to work with. No more copying secrets to developer machines or bending [12FA principles](https://12factor.net/config) with tight couplings to secret managers.
 
-- How it works
-- Installation
-- Command usage
-- Resolver config
-- FAQ
-
-## How it works
+## Intro
 
 **nv** looks for environment variables containing `nv://` URL's and automatically resolves them to a value. It first runs the `dotenv` loader so you can manage values by environment in `.env` files.
 
@@ -32,39 +26,27 @@ resolvers:
   1password: op read op://$NV_URL_PATH
 ```
 
-There are two essential `nv` commands, **run** and **print**.
+The primary `nv` commands are **run** and **print**.
 
 ```bash
-$ nv run -- node dist/main.js   # run a command with env vars loaded and resolved.
-$ nv -- node dist/main.js       # 'run' is the default and can be dropped if '--' is present.
-$ nv -- zsh                     # conveniently start a shell session with vars loaded.
-$ exit                          # exit the session to reset variables.
-$ nv --env staging -- zsh       # start a session for a targeted environment.
+$ nv run -- npm start           # run a command with env vars loaded and resolved.
+$ nv -- npm start               # 'run' is the default and can be dropped if '--' is present.
+$ nv -- zsh                     # it can be handy to start a shell session with vars loaded.
+$ nv --env staging -- zsh       # run with a targeted environment.
 
-$ nv print                      # resolve and print values to inspect them.
+$ nv print                      # resolve and print loaded values to inspect them.
+DB_PASSWORD=hello-from-vault!
+VENDOR_API_KEY=hello-again!
 $ nv print --output json        # print in json or yaml for easy parsing by applications.
+{
+  "DB_PASSWORD": "hello-from-vault!",
+  "VENDOR_API_KEY": "hello-again!"
+}
 ```
-
-The CLI approach allows `nv` to be used in any runtime environment and any language or tech stack. This also makes it usable with software you don't own the code for.
-
-Language-specific libraries are not currently available, but could bring modest convenience, and may be explored depending on interest.
 
 ## Installation
 
 <!-- need a solution for distributing the CLI -->
-
-## Command usage
-
-```bash
-$ nv -- node dist/main.js   # launch an application with env vars loaded
-```
-
-OR
-
-```bash
-$ nv -- zsh                 # launch a new shell session with env vars loaded
-$ node dist/main.js
-```
 
 ## Resolver config
 
