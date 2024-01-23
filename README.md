@@ -18,7 +18,7 @@ DB_PASSWORD=nv://vault/kv/data/my-service?field=db-password
 VENDOR_API_KEY=nv://vault/kv/data/my-service?field=vendor-key
 ```
 
-```
+```dotenv
 # .env.local - easily override with static values or other managers
 DB_PASSWORD=postgres
 VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key
