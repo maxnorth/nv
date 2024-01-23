@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/tidwall/gjson"
 	"gopkg.in/yaml.v3"
 
@@ -13,8 +14,14 @@ import (
 )
 
 func Load() *Resolver {
+	err := godotenv.Load(".env", ".env.local")
+	if err != nil {
+		panic(err)
+	}
+
 	r := &Resolver{
-		providers: map[string]providers.Provider{},
+		providers:       map[string]providers.Provider{},
+		loadedProviders: map[providers.Provider]struct{}{},
 	}
 
 	yamlBytes, err := os.ReadFile("./nv.yaml")

@@ -1,2 +1,5 @@
 build:
-	go build -o bin/nv cmd/main.go
+	go build -o bin/nv main.go
+
+run:
+	go run main.go

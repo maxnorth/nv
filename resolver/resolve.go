@@ -5,86 +5,58 @@ import (
 	"net/url"
 	"os"
 	"strings"
-
-	"github.com/joho/godotenv"
 )
 
-type ValueConfig struct {
-	ProviderAlias string
-	ValueUrl      *url.URL
-	ValueUrlRaw   string
-	EnvKey        string
-}
-
-func (r Resolver) Resolve() map[string]string {
-	err := godotenv.Load(".env", ".env.local")
-	if err != nil {
-		panic(err)
-	}
-
-	for _, provider := range r.providers {
-		err := provider.Load()
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	// load providers eagerly - start dumb
-	// check environment for providers and keys
-	valueConfigs := []ValueConfig{}
+func (r Resolver) ResolveEnvironment() (map[string]string, error) {
+	resolvedValues := map[string]string{}
 	for _, e := range os.Environ() {
-		if valueConfig, found := parseValueConfig(e); found {
-			valueConfigs = append(valueConfigs, valueConfig)
-		}
-	}
+		rawPair := strings.SplitN(e, "=", 2)
+		name, value := rawPair[0], rawPair[1]
 
-	values := map[string]string{}
-	for _, valueConfig := range valueConfigs {
-		provider, found := r.providers[valueConfig.ProviderAlias]
-		if !found {
-			fmt.Printf("warning: no provider found for '%s'\n", valueConfig.ProviderAlias)
+		if !strings.HasPrefix(value, "nv://") {
 			continue
 		}
 
-		value, err := provider.GetValue(valueConfig.ValueUrlRaw)
+		value, err := r.ResolveUrl(value)
 		if err != nil {
-			fmt.Printf("error: no key found for '%s' in provider '%s'\n", valueConfig.ValueUrl, valueConfig.ProviderAlias)
+			return nil, err
+		}
+
+		resolvedValues[name] = value
+		os.Setenv(name, value)
+	}
+
+	return resolvedValues, nil
+}
+
+func (r *Resolver) ResolveUrl(rawUrl string) (string, error) {
+	parsedUrl, err := url.Parse(rawUrl)
+	if err != nil {
+		return "", err
+	}
+
+	provider, found := r.providers[parsedUrl.Host]
+	if !found {
+		// TODO: revisit - happy with this pattern?
+		fmt.Printf("warning: no provider found for '%s'\n", parsedUrl.Host)
+		return "", nil
+	}
+
+	if _, loaded := r.loadedProviders[provider]; !loaded {
+		err := provider.Load()
+		if err != nil {
+			fmt.Printf("error: failed to load provider '%s': %s\n", parsedUrl.Host, err)
 			os.Exit(1)
 		}
 
-		os.Setenv(valueConfig.EnvKey, value)
-
-		values[valueConfig.EnvKey] = value
+		r.loadedProviders[provider] = struct{}{}
 	}
 
-	return values
-}
-
-func parseValueConfig(rawKeyValue string) (ValueConfig, bool) {
-	rawPair := strings.SplitN(rawKeyValue, "=", 2)
-	envKey, value := rawPair[0], rawPair[1]
-	if !strings.HasPrefix(value, "nv://") {
-		// other format checks, such as allowed chars, should be done
-		return ValueConfig{}, false
-	}
-
-	valueUrl, err := url.Parse(value)
+	value, err := provider.GetValue(rawUrl)
 	if err != nil {
-		fmt.Printf(
-			"url parse error: %s: %s\n",
-			value,
-			err,
-		)
+		fmt.Printf(err.Error())
 		os.Exit(1)
-		return ValueConfig{}, false
 	}
 
-	valueConfig := ValueConfig{
-		ProviderAlias: valueUrl.Host,
-		ValueUrlRaw:   value,
-		ValueUrl:      valueUrl,
-		EnvKey:        envKey,
-	}
-
-	return valueConfig, true
+	return value, nil
 }

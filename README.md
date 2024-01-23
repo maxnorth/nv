@@ -1,10 +1,16 @@
 # nv - Enviably simple app configuration
 
-**nv** is a dotenv-style environment variable loader that makes secret managers easier to work with. No more copying secrets to developer machines or bending [12FA principles](https://12factor.net/config) by tightly coupling services to secret managers.
+**nv** is a dotenv-based env var loader with built-in secret manager integration.
+
+It's an opinionated framework for app configuration based on the belief that integrating with secret managers in app code is a bad coupling:
+
+- it breaks [12 Factor App principles](https://12factor.net/config)
+- you'll need a different solution for providing secrets to other tools, like if you run a database migration CLI on deploy
+- you'll need to implement your own logic to change how secrets are sourced in local dev, if you want to switch to env var values or pull from a different secret manager instead
 
 ## Intro
 
-**nv** looks for environment variables containing `nv://` URL's and automatically resolves them to a value. It also runs the `dotenv` loader so you can manage values by environment in `.env` files.
+**nv** looks for environment variables containing `nv://` URL's and automatically resolves them to a value. It first runs the `dotenv` loader so you can manage values by environment in `.env` files.
 
 ```dotenv
 # .env
