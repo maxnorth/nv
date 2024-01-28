@@ -1,33 +1,34 @@
-# nv - Enviably simple app configuration
+# nv - Enviably easy env config
 
-**nv** is a dotenv-based env var loader with secret manager integration baked in.
+**nv** is a .env file loader with secret manager integration built in. It's a unified way to manage regular values and secret locations together in .env files.
 
-It's an opinionated framework for app configuration motivated by the belief that integrating with secret managers in app code is a bad coupling:
+It is also:
 
-- it breaks (or at least bends) [12 Factor App principles](https://12factor.net/config)
-- you need a different secret access solution for other tools, like a database migration CLI run during deploy
-- you need to implement your own logic to change how secrets are sourced in local dev, if you want to switch to env vars or pull from a different secret manager instead
+- Highly versatile - easy to connect to any secret manager or data source, and available for Linux, Mac, and (soon) Windows
+- An easy way for developers to avoid copying shared secrets to their devices
+- Flexible enough to handle the distinct needs of both local development and cloud environments
+- A CLI decoupled from app code in line with [12 Factor App principles](https://12factor.net/config), so it can be used with any software
 
 ## Intro
 
-**nv** looks for environment variables containing `nv://` URL's and automatically resolves them to a value. It first runs the `dotenv` loader so you can manage values by environment in `.env` files.
+**nv** loads environment variables from `.env` files, then looks for values that are `nv://` URLs and automatically resolves them to a real value. These URLs contain location details for secrets stored in secret managers.
 
 ```dotenv
 # .env
 DB_PASSWORD=nv://vault/kv/data/my-service?field=db-password
-VENDOR_API_KEY=nv://vault/kv/data/my-service?field=vendor-key
+VENDOR_API_KEY=nv://vault/kv/data/my-vendor?field=api-key
 ```
 
 ```dotenv
 # .env.local - easily override with static values or other managers
-DB_PASSWORD=postgres
+DB_PASSWORD=local-db-password
 VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key
 ```
 
-These URLs are matched to **resolvers**, commands that **nv** runs to obtain a value for the URL, which you define in `nv.yaml`.
+**nv** matches these URLs to **resolvers**, commands you define to fetch a secret using the URL, which are configured in `nv.yaml`. These commands might invoke secret manager CLIs or custom scripts.
 
 ```yaml
-# NV_URL_* env vars are provided to access parts of the URL
+# NV_URL_* env vars can be used by commands to access parts of the URL
 resolvers:
   vault: vault kv get -mount="secret" -field=$NV_URL_ARG_FIELD $NV_URL_PATH
   sops: sops -d --extract $NV_URL_ARG_EXTRACT $NV_URL_PATH
@@ -39,8 +40,8 @@ The primary `nv` commands are **run** and **print**.
 ```bash
 $ nv run -- npm start           # run a command with env vars loaded and resolved.
 $ nv -- npm start               # 'run' is the default and can be skipped for convenience.
-$ nv -- zsh                     # it can be handy to start a shell session with vars loaded.
-$ nv -e staging -- zsh          # run using a targeted environment.
+$ nv -- zsh                     # it's easy to start a shell session with vars loaded.
+$ nv -e staging -- zsh          # or run using a targeted environment.
 
 $ nv print                      # load, resolve, and print values for inspection.
 DB_PASSWORD=hello-from-vault!
