@@ -35,7 +35,7 @@ resolvers:
   1password: op read op://$NV_URL_PATH
 ```
 
-The primary `nv` commands are **run** and **print**.
+The primary `nv` CLI commands are `run` and `print`.
 
 ```bash
 $ nv run -- npm start           # run a command with env vars loaded and resolved.
