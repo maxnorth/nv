@@ -12,7 +12,7 @@ func PrintCmd() *cobra.Command {
 	printCmd := &cobra.Command{
 		Use: "print",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			r := resolver.Load()
+			r := resolver.Load(cmd.Flag("env").Value.String())
 
 			values, err := r.ResolveEnvironment()
 			if err != nil {

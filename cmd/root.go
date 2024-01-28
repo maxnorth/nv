@@ -24,7 +24,7 @@ func RootCmd() *cobra.Command {
 			return errors.New("internal error: failed to find 'run' command")
 		},
 	}
-	rootCmd.PersistentFlags().StringP("env", "e", "", "target environment")
+	rootCmd.PersistentFlags().StringP("env", "e", "local", "target environment")
 
 	rootCmd.AddCommand(
 		PrintCmd(),

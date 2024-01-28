@@ -3,6 +3,7 @@ package resolver
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -13,11 +14,8 @@ import (
 	"github.com/maxnorth/nv/providers/commandprovider"
 )
 
-func Load() *Resolver {
-	err := godotenv.Load(".env", ".env.local")
-	if err != nil {
-		panic(err)
-	}
+func Load(env string) *Resolver {
+	runDotenv(env)
 
 	r := &Resolver{
 		providers:       map[string]providers.Provider{},
@@ -79,4 +77,18 @@ func yamlToJson(yamlBytes []byte) []byte {
 	}
 
 	return jsonBytes
+}
+
+func runDotenv(env string) {
+	files := []string{".env", fmt.Sprintf(".env.%s", env)}
+
+	for _, f := range files {
+		switch err := godotenv.Load(f).(type) {
+		case nil:
+		case *fs.PathError:
+		default:
+			fmt.Printf("error: failed to load %s file: %s\n", f, err)
+			os.Exit(1)
+		}
+	}
 }

@@ -2,3 +2,4 @@ resolvers:
   vault: vault kv get -mount="secret" -field=$NV_URL_ARG_FIELD $NV_URL_PATH
   sops: sops -d --extract $NV_URL_ARG_EXTRACT $NV_URL_PATH
   1password: op read op://$NV_URL_PATH
+  echo: echo $NV_URL

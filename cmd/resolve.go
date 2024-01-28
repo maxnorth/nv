@@ -11,7 +11,7 @@ func ResolveCmd() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use: "resolve",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			r := resolver.Load()
+			r := resolver.Load(cmd.Flag("env").Value.String())
 
 			value, err := r.ResolveUrl(args[0])
 			if err != nil {

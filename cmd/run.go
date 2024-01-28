@@ -32,7 +32,7 @@ func RunCmd() *cobra.Command {
 				return errors.New("command was not provided after --")
 			}
 
-			r := resolver.Load()
+			r := resolver.Load(cmd.Flag("env").Value.String())
 
 			_, err := r.ResolveEnvironment()
 			if err != nil {

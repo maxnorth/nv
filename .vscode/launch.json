@@ -11,7 +11,7 @@
             "mode": "auto",
             "program": "./main.go",
             "cwd": "./example",
-            "args": ["resolve", "nv://vault/asd"]
+            "args": ["print"]
         }
     ]
 }
