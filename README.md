@@ -5,7 +5,7 @@
 It's also:
 
 - Highly versatile - can connect to any secret manager, and available for Linux, Mac, and (soon) Windows
-- An easy way to avoid copying secrets to developer's devices
+- An ideal way to avoid copying secrets to personal devices during local development
 - Flexible enough to handle the different needs of local development and cloud environments
 - A CLI decoupled from app code in line with [12 Factor App principles](https://12factor.net/config), making it usable with any software
 
@@ -58,7 +58,7 @@ $ nv print --output json        # print in json or yaml for easy parsing by appl
 
 <!-- need a solution for distributing the CLI -->
 
-Copy and run **_just one_** of these lines to configure which build of **nv** to install.
+Copy and run **just one** of these lines to configure which build of **nv** to install.
 
 ```bash
 INSTALL_TARGET=darwin-amd64 # macOS Intel chip
