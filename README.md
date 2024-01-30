@@ -58,6 +58,22 @@ $ nv print --output json        # print in json or yaml for easy parsing by appl
 
 <!-- need a solution for distributing the CLI -->
 
+Copy and run just one of these lines to configure which build of **nv** to install.
+
+```bash
+INSTALL_TARGET=darwin-amd64 # macOS Intel chip
+INSTALL_TARGET=darwin-arm64 # macOS Apple silicon
+INSTALL_TARGET=linux-amd64 # Linux Intel chip
+INSTALL_TARGET=linux-arm64 # Linux ARM chip
+```
+
+Then run this snippet to install.
+
+```bash
+curl -fsSL -o /usr/local/bin/nv https://github.com/maxnorth/nv/releases/latest/download/$INSTALL_TARGET-nv
+chmod 700 /usr/local/bin/nv
+```
+
 ## Resolver config
 
 Each resolver has a name and a command to run to resolve URLs. Commands are called once per URL, and the output of the command is used as the value. URLs are matched to resolvers by the host portion of the URL (see table below if URL portion clarity is needed).
