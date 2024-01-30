@@ -58,7 +58,7 @@ $ nv print --output json        # print in json or yaml for easy parsing by appl
 
 <!-- need a solution for distributing the CLI -->
 
-Copy and run just one of these lines to configure which build of **nv** to install.
+Copy and run **_just one_** of these lines to configure which build of **nv** to install.
 
 ```bash
 INSTALL_TARGET=darwin-amd64 # macOS Intel chip
