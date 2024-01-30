@@ -1,15 +1,15 @@
 # nv - Enviably easy env config
 
-**nv** is a .env file loader with secret manager integration built in. It's a unified way to manage regular values and secret locations together in .env files.
+**nv** is an experimental .env file loader with secret manager integration. It's a unified way to manage regular values and secrets together in .env files.
 
-It is also:
+It's also:
 
-- Highly versatile - easy to connect to any secret manager or data source, and available for Linux, Mac, and (soon) Windows
-- An easy way for developers to avoid copying shared secrets to their devices
-- Flexible enough to handle the distinct needs of both local development and cloud environments
-- A CLI decoupled from app code in line with [12 Factor App principles](https://12factor.net/config), so it can be used with any software
+- Highly versatile - can connect to any secret manager, and available for Linux, Mac, and (soon) Windows
+- An easy way to avoid copying secrets to developer's devices
+- Flexible enough to handle the different needs of local development and cloud environments
+- A CLI decoupled from app code in line with [12 Factor App principles](https://12factor.net/config), making it usable with any software
 
-## Intro
+## How it works
 
 **nv** loads environment variables from `.env` files, then looks for values that are `nv://` URLs and automatically resolves them to a real value. These URLs contain location details for secrets stored in secret managers.
 
@@ -25,7 +25,7 @@ DB_PASSWORD=local-db-password
 VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key
 ```
 
-**nv** matches these URLs to **resolvers**, commands you define to fetch a secret using the URL, which are configured in `nv.yaml`. These commands might invoke secret manager CLIs or custom scripts.
+**nv** matches these URLs to **resolvers**, commands you define to fetch a secret using the URL, which are configured in `nv.yaml`. These commands might invoke secret manager CLI tools or custom scripts.
 
 ```yaml
 # NV_URL_* env vars can be used by commands to access parts of the URL
@@ -70,11 +70,11 @@ INSTALL_TARGET=linux-arm64 # Linux ARM chip
 Then run this snippet to install.
 
 ```bash
-curl -fsSL -o /usr/local/bin/nv https://github.com/maxnorth/nv/releases/latest/download/$INSTALL_TARGET-nv
+curl -fsSL -o /usr/local/bin/nv https://github.com/maxnorth/nv/releases/latest/download/nv-$INSTALL_TARGET
 chmod 700 /usr/local/bin/nv
 ```
 
-## Resolver config
+## Resolvers in depth
 
 Each resolver has a name and a command to run to resolve URLs. Commands are called once per URL, and the output of the command is used as the value. URLs are matched to resolvers by the host portion of the URL (see table below if URL portion clarity is needed).
 
