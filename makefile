@@ -1,6 +1,6 @@
 
 build:
-	go build -o bin/nv main.go
+	go build -o dist/nv main.go
 
 run:
 	go run main.go
