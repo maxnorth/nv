@@ -1,0 +1,17 @@
+name: "CI Checks"
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  run-ci:
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build CLI
+        run: |
+          make build
+      - name: Run tests
+        run: |
+          make test
