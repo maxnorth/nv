@@ -16,7 +16,7 @@ import (
 )
 
 func Load(env string) (*Resolver, error) {
-	err := runDotenv(env)
+	keys, err := runDotenv(env)
 	if err != nil {
 		return nil, err
 	}
@@ -24,6 +24,7 @@ func Load(env string) (*Resolver, error) {
 	r := &Resolver{
 		providers:       map[string]providers.Provider{},
 		loadedProviders: map[providers.Provider]struct{}{},
+		LoadedVars:      keys,
 	}
 
 	yamlBytes, err := os.ReadFile("./nv.yaml")
@@ -86,17 +87,26 @@ func yamlToJson(yamlBytes []byte) []byte {
 	return jsonBytes
 }
 
-func runDotenv(env string) error {
-	files := []string{".env", fmt.Sprintf(".env.%s", env)}
+func runDotenv(env string) ([]string, error) {
+	files := []string{fmt.Sprintf(".env.%s", env), ".env"}
 
+	keys := []string{}
 	for _, f := range files {
-		switch err := godotenv.Load(f).(type) {
+		envMap, err := godotenv.Read(f)
+		switch err := err.(type) {
 		case nil:
 		case *fs.PathError:
 		default:
-			return fmt.Errorf("error: failed to load %s file: %s\n", f, err)
+			return nil, fmt.Errorf("error: failed to load %s file: %s\n", f, err)
+		}
+
+		for key, val := range envMap {
+			if _, exists := os.LookupEnv(key); !exists {
+				keys = append(keys, key)
+				os.Setenv(key, val)
+			}
 		}
 	}
 
-	return nil
+	return keys, nil
 }

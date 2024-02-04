@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"sort"
 
 	"github.com/maxnorth/nv/internal/resolver"
 	"github.com/spf13/cobra"
@@ -23,7 +25,17 @@ func NewPrintCmd() *cobra.Command {
 				return err
 			}
 
-			printEnv(values, cmd.Flag("output").Value.String())
+			keys := r.LoadedVars
+			for _, key := range r.LoadedVars {
+				delete(values, key)
+			}
+			for key := range values {
+				keys = append(keys, key)
+			}
+
+			sort.Strings(keys)
+
+			printEnv(keys, cmd.Flag("output").Value.String())
 
 			return nil
 		},
@@ -33,9 +45,14 @@ func NewPrintCmd() *cobra.Command {
 	return printCmd
 }
 
-func printEnv(values map[string]string, output string) error {
+func printEnv(keys []string, output string) error {
 	if output == "" {
 		return errors.New("missing value for --output arg")
+	}
+
+	values := map[string]string{}
+	for _, key := range keys {
+		values[key] = os.Getenv(key)
 	}
 
 	if output == "json" {
@@ -58,8 +75,8 @@ func printEnv(values map[string]string, output string) error {
 	}
 
 	if outputTemplate != "" {
-		for key, value := range values {
-			fmt.Printf(outputTemplate, key, value)
+		for _, key := range keys {
+			fmt.Printf(outputTemplate, key, values[key])
 		}
 		return nil
 	}
@@ -70,7 +87,7 @@ func printEnv(values map[string]string, output string) error {
 	}
 
 	if outputTemplate != "" {
-		for key, _ := range values {
+		for _, key := range keys {
 			fmt.Printf(outputTemplate, key)
 		}
 		return nil

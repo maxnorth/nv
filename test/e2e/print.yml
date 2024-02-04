@@ -5,20 +5,24 @@ test:
       cmd: nv print
       out: |
         EXAMPLE_VALUE=something/or/other
+        STATIC_VALUE=this did not use a resolver
   - it: can print in yaml
     with:
       cmd: nv print -o yaml
       out: |
         EXAMPLE_VALUE: "something/or/other"
+        STATIC_VALUE: "this did not use a resolver"
   - it: can print in json
     with:
       cmd: nv print -o json
       out: |
         {
-          "EXAMPLE_VALUE": "something/or/other"
+          "EXAMPLE_VALUE": "something/or/other",
+          "STATIC_VALUE": "this did not use a resolver"
         }
   - it: can print for shell eval
     with:
       cmd: nv print -o shell
       out: |
         export EXAMPLE_VALUE="something/or/other"
+        export STATIC_VALUE="this did not use a resolver"
