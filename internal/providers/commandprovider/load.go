@@ -1,14 +1,10 @@
 package commandprovider
 
-import (
-	"fmt"
-	"os"
-)
+import "errors"
 
 func (p *provider) Load() error {
 	if len(p.config.Command) == 0 {
-		fmt.Println("command is not defined")
-		os.Exit(1)
+		return errors.New("command is not defined")
 	}
 
 	return nil

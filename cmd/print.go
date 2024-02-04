@@ -1,18 +1,22 @@
 package cmd
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
-	"os"
 
-	"github.com/maxnorth/nv/resolver"
+	"github.com/maxnorth/nv/internal/resolver"
 	"github.com/spf13/cobra"
 )
 
-func PrintCmd() *cobra.Command {
+func NewPrintCmd() *cobra.Command {
 	printCmd := &cobra.Command{
 		Use: "print",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			r := resolver.Load(cmd.Flag("env").Value.String())
+			r, err := resolver.Load(cmd.Flag("env").Value.String())
+			if err != nil {
+				return err
+			}
 
 			values, err := r.ResolveEnvironment()
 			if err != nil {
@@ -29,10 +33,18 @@ func PrintCmd() *cobra.Command {
 	return printCmd
 }
 
-func printEnv(values map[string]string, output string) {
+func printEnv(values map[string]string, output string) error {
 	if output == "" {
-		fmt.Println("missing value for --output arg")
-		os.Exit(1)
+		return errors.New("missing value for --output arg")
+	}
+
+	if output == "json" {
+		jsonOutput, err := json.MarshalIndent(values, "", "  ")
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(jsonOutput))
+		return nil
 	}
 
 	var outputTemplate string
@@ -49,7 +61,7 @@ func printEnv(values map[string]string, output string) {
 		for key, value := range values {
 			fmt.Printf(outputTemplate, key, value)
 		}
-		return
+		return nil
 	}
 
 	switch output {
@@ -61,6 +73,8 @@ func printEnv(values map[string]string, output string) {
 		for key, _ := range values {
 			fmt.Printf(outputTemplate, key)
 		}
-		return
+		return nil
 	}
+
+	return nil
 }

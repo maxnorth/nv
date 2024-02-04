@@ -1,6 +1,6 @@
 # nv - Enviably easy env config
 
-**nv** is an experimental .env file loader with secret manager integration. It's a unified way to manage regular values and secrets together in .env files.
+**nv** is a .env file loader with secret manager integration. It decouples applications from secret managers and unifies management of both secrets and regular values in .env files.
 
 It's also:
 

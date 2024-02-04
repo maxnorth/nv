@@ -10,8 +10,8 @@
             "request": "launch",
             "mode": "auto",
             "program": "./main.go",
-            "cwd": "./example",
-            "args": ["print"]
+            "cwd": ".",
+            "args": ["print", "-d", "test/contexts/standards"]
         }
     ]
 }

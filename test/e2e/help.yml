@@ -1,0 +1,35 @@
+describe: help text
+test:
+  - it: is displayed when running without command or args
+    with:
+      cmd: nv
+      out: &helpText |
+        Usage:
+          nv [flags]
+          nv [command]
+
+        Available Commands:
+          completion  Generate the autocompletion script for the specified shell
+          help        Help about any command
+          print
+          resolve
+          run
+
+        Flags:
+          -d, --dir string   path to dir containing nv.yaml and .env files (default ".")
+          -e, --env string   target environment (default "local")
+          -h, --help         help for nv
+
+        Use "nv [command] --help" for more information about a command.
+  - it: is displayed when using help command
+    with:
+      cmd: nv help
+      out: *helpText
+  - it: is displayed when using --help flag on root command
+    with:
+      cmd: nv --help
+      out: *helpText
+  - it: is displayed when using -h shorthand flag on root command
+    with:
+      cmd: nv -h
+      out: *helpText

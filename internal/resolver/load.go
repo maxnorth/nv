@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -10,12 +11,15 @@ import (
 	"github.com/tidwall/gjson"
 	"gopkg.in/yaml.v3"
 
-	"github.com/maxnorth/nv/providers"
-	"github.com/maxnorth/nv/providers/commandprovider"
+	"github.com/maxnorth/nv/internal/providers"
+	"github.com/maxnorth/nv/internal/providers/commandprovider"
 )
 
-func Load(env string) *Resolver {
-	runDotenv(env)
+func Load(env string) (*Resolver, error) {
+	err := runDotenv(env)
+	if err != nil {
+		return nil, err
+	}
 
 	r := &Resolver{
 		providers:       map[string]providers.Provider{},
@@ -24,8 +28,7 @@ func Load(env string) *Resolver {
 
 	yamlBytes, err := os.ReadFile("./nv.yaml")
 	if err != nil {
-		fmt.Println("nv.yaml not found")
-		os.Exit(1)
+		return nil, errors.New("nv.yaml not found")
 	}
 	jsonBytes := yamlToJson(yamlBytes)
 
@@ -53,18 +56,22 @@ func Load(env string) *Resolver {
 			}
 			r.providers[providerAlias] = commandprovider.New(config)
 		default:
-			fmt.Printf(
+			err = fmt.Errorf(
 				"nv.yaml error: resolver '%s' has unrecognized provider '%s'\n",
 				providerAlias,
 				providerType,
 			)
-			os.Exit(1)
+			return false
 		}
 
 		return true
 	})
 
-	return r
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
 func yamlToJson(yamlBytes []byte) []byte {
@@ -79,7 +86,7 @@ func yamlToJson(yamlBytes []byte) []byte {
 	return jsonBytes
 }
 
-func runDotenv(env string) {
+func runDotenv(env string) error {
 	files := []string{".env", fmt.Sprintf(".env.%s", env)}
 
 	for _, f := range files {
@@ -87,8 +94,9 @@ func runDotenv(env string) {
 		case nil:
 		case *fs.PathError:
 		default:
-			fmt.Printf("error: failed to load %s file: %s\n", f, err)
-			os.Exit(1)
+			return fmt.Errorf("error: failed to load %s file: %s\n", f, err)
 		}
 	}
+
+	return nil
 }

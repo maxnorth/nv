@@ -45,8 +45,7 @@ func (r *Resolver) ResolveUrl(rawUrl string) (string, error) {
 	if _, loaded := r.loadedProviders[provider]; !loaded {
 		err := provider.Load()
 		if err != nil {
-			fmt.Printf("error: failed to load provider '%s': %s\n", parsedUrl.Host, err)
-			os.Exit(1)
+			return "", fmt.Errorf("error: failed to load provider '%s': %s\n", parsedUrl.Host, err)
 		}
 
 		r.loadedProviders[provider] = struct{}{}
@@ -54,8 +53,7 @@ func (r *Resolver) ResolveUrl(rawUrl string) (string, error) {
 
 	value, err := provider.GetValue(rawUrl)
 	if err != nil {
-		fmt.Printf(err.Error())
-		os.Exit(1)
+		return "", err
 	}
 
 	return value, nil

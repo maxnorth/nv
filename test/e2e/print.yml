@@ -1,0 +1,24 @@
+describe: print command
+test:
+  - it: prints resolved values only
+    with:
+      cmd: nv print
+      out: |
+        EXAMPLE_VALUE=something/or/other
+  - it: can print in yaml
+    with:
+      cmd: nv print -o yaml
+      out: |
+        EXAMPLE_VALUE: "something/or/other"
+  - it: can print in json
+    with:
+      cmd: nv print -o json
+      out: |
+        {
+          "EXAMPLE_VALUE": "something/or/other"
+        }
+  - it: can print for shell eval
+    with:
+      cmd: nv print -o shell
+      out: |
+        export EXAMPLE_VALUE="something/or/other"
