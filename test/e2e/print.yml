@@ -25,4 +25,4 @@ test:
       cmd: nv print -o shell
       out: |
         export EXAMPLE_VALUE="something/or/other"
-        export STATIC_VALUE="this did not use a resolver"
+        export STATIC_VALUE="this did not use a resolverd"
