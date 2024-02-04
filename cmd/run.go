@@ -2,18 +2,13 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
-	"log"
-	"os"
 	"os/exec"
-	"path/filepath"
-	"syscall"
 
-	"github.com/maxnorth/nv/resolver"
+	"github.com/maxnorth/nv/internal/resolver"
 	"github.com/spf13/cobra"
 )
 
-func RunCmd() *cobra.Command {
+func NewRunCmd() *cobra.Command {
 	runCmd := &cobra.Command{
 		Use: "run",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -32,14 +27,20 @@ func RunCmd() *cobra.Command {
 				return errors.New("command was not provided after --")
 			}
 
-			r := resolver.Load(cmd.Flag("env").Value.String())
-
-			_, err := r.ResolveEnvironment()
+			r, err := resolver.Load(cmd.Flag("env").Value.String())
 			if err != nil {
 				return err
 			}
 
-			execCommand(args)
+			_, err = r.ResolveEnvironment()
+			if err != nil {
+				return err
+			}
+
+			err = execCommand(cmd, args)
+			if err != nil {
+				return err
+			}
 
 			return nil
 		},
@@ -48,18 +49,19 @@ func RunCmd() *cobra.Command {
 	return runCmd
 }
 
-func execCommand(commandArgs []string) {
-	command, _ := commandArgs[0], []string{}
-	fname, err := exec.LookPath(command)
-	if err == nil {
-		fname, err = filepath.Abs(fname)
+func execCommand(cobraCmd *cobra.Command, commandArgs []string) error {
+	command, args := commandArgs[0], []string{}
+	if len(commandArgs) > 1 {
+		args = commandArgs[1:]
 	}
+	cmd := exec.Command(command, args...)
+	cmd.Stdin = cobraCmd.InOrStdin()
+	cmd.Stdout = cobraCmd.OutOrStdout()
+	cmd.Stderr = cobraCmd.ErrOrStderr()
+	err := cmd.Run()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	err = syscall.Exec(fname, commandArgs, os.Environ())
-	if err != nil {
-		fmt.Printf("failed to run command: %s\n", err)
-		os.Exit(1)
-	}
+
+	return nil
 }

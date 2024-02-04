@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RootCmd() *cobra.Command {
+func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use: "nv",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -23,13 +23,14 @@ func RootCmd() *cobra.Command {
 
 			return errors.New("internal error: failed to find 'run' command")
 		},
+		SilenceUsage: true,
 	}
 	rootCmd.PersistentFlags().StringP("env", "e", "local", "target environment")
 
 	rootCmd.AddCommand(
-		PrintCmd(),
-		ResolveCmd(),
-		RunCmd(),
+		NewPrintCmd(),
+		NewResolveCmd(),
+		NewRunCmd(),
 	)
 
 	return rootCmd

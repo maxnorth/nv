@@ -1,7 +1,7 @@
 package commandprovider
 
 import (
-	"github.com/maxnorth/nv/providers"
+	"github.com/maxnorth/nv/internal/providers"
 )
 
 type provider struct {

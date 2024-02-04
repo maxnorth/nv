@@ -1,0 +1,2 @@
+resolvers:
+  echo: echo $NV_URL_PATH
