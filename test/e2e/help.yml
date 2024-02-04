@@ -16,6 +16,7 @@ test:
           run
 
         Flags:
+          -d, --dir string   path to dir containing nv.yaml and .env files (default ".")
           -e, --env string   target environment (default "local")
           -h, --help         help for nv
 
