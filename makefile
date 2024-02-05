@@ -13,4 +13,5 @@ uninstall:
 	rm /usr/local/bin/nv
 
 release:
+	rm -rf ./dist
 	sh ./bin/release.sh

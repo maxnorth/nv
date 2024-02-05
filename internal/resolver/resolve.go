@@ -1,6 +1,7 @@
 package resolver
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -13,7 +14,8 @@ func (r Resolver) ResolveEnvironment() (map[string]string, error) {
 		rawPair := strings.SplitN(e, "=", 2)
 		name, value := rawPair[0], rawPair[1]
 
-		if !strings.HasPrefix(value, "nv://") {
+		// TODO: what are the error conditions vs ignore?
+		if !strings.HasPrefix(value, "nv+") {
 			continue
 		}
 
@@ -35,23 +37,30 @@ func (r *Resolver) ResolveUrl(rawUrl string) (string, error) {
 		return "", err
 	}
 
-	provider, found := r.providers[parsedUrl.Host]
+	schemes := strings.SplitN(parsedUrl.Scheme, "+", 2)
+	if schemes[0] != "nv" {
+		return "", errors.New("TODO")
+	}
+
+	resolverName := schemes[1]
+
+	resolver, found := r.providers[resolverName]
 	if !found {
 		// TODO: revisit - happy with this pattern?
-		fmt.Printf("warning: no provider found for '%s'\n", parsedUrl.Host)
+		fmt.Printf("warning: no resolver found for '%s'\n", resolverName)
 		return "", nil
 	}
 
-	if _, loaded := r.loadedProviders[provider]; !loaded {
-		err := provider.Load()
+	if _, loaded := r.loadedProviders[resolver]; !loaded {
+		err := resolver.Load()
 		if err != nil {
-			return "", fmt.Errorf("error: failed to load provider '%s': %s\n", parsedUrl.Host, err)
+			return "", fmt.Errorf("error: failed to load resolver '%s': %s\n", resolverName, err)
 		}
 
-		r.loadedProviders[provider] = struct{}{}
+		r.loadedProviders[resolver] = struct{}{}
 	}
 
-	value, err := provider.GetValue(rawUrl)
+	value, err := resolver.GetValue(rawUrl)
 	if err != nil {
 		return "", err
 	}
