@@ -1,20 +1,30 @@
 describe: print command
+defaultFiles: &defaultFiles
+  .env: |
+    EXAMPLE_VALUE=nv://echo/something/or/other
+    STATIC_VALUE=this did not use a resolver
+  nv.yaml: |
+    resolvers:
+      echo: echo $NV_URL_PATH
 test:
-  - it: prints resolved values only
+  - it: prints values
     with:
       cmd: nv print
+      files: *defaultFiles
       out: |
         EXAMPLE_VALUE=something/or/other
         STATIC_VALUE=this did not use a resolver
   - it: can print in yaml
     with:
       cmd: nv print -o yaml
+      files: *defaultFiles
       out: |
         EXAMPLE_VALUE: "something/or/other"
         STATIC_VALUE: "this did not use a resolver"
   - it: can print in json
     with:
       cmd: nv print -o json
+      files: *defaultFiles
       out: |
         {
           "EXAMPLE_VALUE": "something/or/other",
@@ -23,6 +33,7 @@ test:
   - it: can print for shell eval
     with:
       cmd: nv print -o shell
+      files: *defaultFiles
       out: |
         export EXAMPLE_VALUE="something/or/other"
         export STATIC_VALUE="this did not use a resolver"

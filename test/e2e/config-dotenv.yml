@@ -1,0 +1,18 @@
+describe: dotenv loader
+defaultFiles: &defaultFiles
+  .env: |
+    EXAMPLE_VALUE=nv://echo/something/or/other
+    STATIC_VALUE=this did not use a resolver
+  nv.yaml: |
+    resolvers:
+      echo: echo $NV_URL_PATH
+test:
+  - it: fails when there's a syntax error
+    with:
+      cmd: nv print
+      files:
+        <<: *defaultFiles
+        .env.local: |
+          INVALID-KEY=fake
+      err: |
+        Error: failed to load .env.local file: unexpected character "-" in variable name near "INVALID-KEY=fake\n"

@@ -1,7 +1,0 @@
-describe: run command
-test:
-  - it: runs echo with args
-    with:
-      cmd: nv -- echo something
-      out: |
-        something

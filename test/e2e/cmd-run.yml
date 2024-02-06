@@ -1,0 +1,36 @@
+describe: run command
+defaultFiles: &defaultFiles
+  .env: |
+    EXAMPLE_VALUE=nv://echo/something/or/other
+    STATIC_VALUE=this did not use a resolver
+  nv.yaml: |
+    resolvers:
+      echo: echo $NV_URL_PATH
+test:
+  - it: displays help text with help command
+    with:
+      cmd: nv help run
+      out: &helpText |
+        Usage:
+          nv run [flags]
+
+        Flags:
+          -h, --help   help for run
+
+        Global Flags:
+          -d, --dir string   path to dir containing nv.yaml and .env files (default ".")
+          -e, --env string   target environment (default "local")
+  - it: displays help text with --help flag
+    with:
+      cmd: nv run --help
+      out: *helpText
+  - it: displays help text with -h flag
+    with:
+      cmd: nv run -h
+      out: *helpText
+  - it: runs echo with args
+    with:
+      cmd: nv -- echo something
+      files: *defaultFiles
+      out: |
+        something
