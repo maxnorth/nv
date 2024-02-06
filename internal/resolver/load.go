@@ -58,7 +58,7 @@ func Load(env string) (*Resolver, error) {
 			r.providers[providerAlias] = commandprovider.New(config)
 		default:
 			err = fmt.Errorf(
-				"nv.yaml error: resolver '%s' has unrecognized provider '%s'\n",
+				"nv.yaml resolver '%s' has unrecognized provider '%s'\n",
 				providerAlias,
 				providerType,
 			)
@@ -97,7 +97,7 @@ func runDotenv(env string) ([]string, error) {
 		case nil:
 		case *fs.PathError:
 		default:
-			return nil, fmt.Errorf("error: failed to load %s file: %s\n", f, err)
+			return nil, fmt.Errorf("failed to load %s file: %s", f, err)
 		}
 
 		for key, val := range envMap {

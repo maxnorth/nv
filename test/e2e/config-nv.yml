@@ -1,0 +1,7 @@
+describe: nv.yaml config
+test:
+  - it: causes fatal error when nv.yaml is missing
+    with:
+      cmd: nv print
+      err: |
+        Error: nv.yaml not found

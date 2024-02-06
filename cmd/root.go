@@ -34,7 +34,7 @@ func NewRootCmd() *cobra.Command {
 				}
 			}
 
-			return errors.New("internal error: failed to find 'run' command")
+			return errors.New("internal failure: failed to find 'run' command")
 		},
 		SilenceUsage: true,
 	}
