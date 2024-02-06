@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/joho/godotenv v1.5.1
+	github.com/sergi/go-diff v1.3.1
 	github.com/spf13/cobra v1.8.0
 	github.com/tidwall/gjson v1.17.0
 	gopkg.in/yaml.v3 v3.0.1
