@@ -5,7 +5,14 @@ on:
 
 jobs:
   run-ci:
-    runs-on: [ubuntu-latest]
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            goos: linux
+          - runner: macos-latest
+            goos: darwin
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
