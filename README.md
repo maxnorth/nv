@@ -76,7 +76,7 @@ chmod 700 /usr/local/bin/nv
 
 ## Resolvers in depth
 
-Each resolver has a name and a command to run to resolve URLs. Commands are called once per URL, and the output of the command is used as the value. URLs are matched to resolvers by the host portion of the URL (see table below if URL portion clarity is needed).
+Each resolver has a name and a command to run to resolve URLs. Commands are called once per URL, and the output of the command is used as the value. URLs are matched to resolvers by the portion of the URL schema after `nv+`.
 
 ```yaml
 resolvers:
@@ -109,6 +109,6 @@ That said, built-in resolvers for third party secret providers may be added to i
 There are a couple ways to change your resolver behavior by environment.
 
 1. You can put variables in relevant `.env` files (`.env.production`, `.env.staging`) with different values, and use that variable in your resolver command. All `.env` files will be loaded before resolvers run.
-2. If more control is needed than above, create a separate resolver entry for the different resolver versions and target the environment-appropriate resolver in the host portion of URLs in the relevant `.env` files.
+2. If more control is needed than above, create a separate resolver entry for the different resolver versions and target the environment-appropriate resolver in the relevant `.env` files.
 
 When/if configuration for resolvers becomes more complex, additional ways to manage environment overrides will likely be introduced.

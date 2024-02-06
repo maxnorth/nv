@@ -1,7 +1,7 @@
 describe: print command
 defaultFiles: &defaultFiles
   .env: |
-    EXAMPLE_VALUE=nv://echo/something/or/other
+    EXAMPLE_VALUE=nv+echo://something/or/other
     STATIC_VALUE=this did not use a resolver
   nv.yaml: |
     resolvers:
