@@ -38,8 +38,8 @@ func (p *provider) GetValue(rawUrl string) (string, error) {
 func getUrlVars(refUrl *url.URL) []string {
 	result := []string{}
 
-	path := strings.TrimLeft(refUrl.Path, "/")
-	result = append(result, "NV_URL="+refUrl.String(), "NV_URL_HOST="+refUrl.Host, "NV_URL_PATH="+path)
+	path := refUrl.Host + refUrl.Path
+	result = append(result, "NV_URL="+refUrl.String(), "NV_URL_PATH="+path)
 
 	queryArgKeys := map[string]struct{}{}
 	for key, values := range refUrl.Query() {

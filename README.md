@@ -11,18 +11,18 @@ It's also:
 
 ## How it works
 
-**nv** loads environment variables from `.env` files, then looks for values that are `nv://` URLs and automatically resolves them to a real value. These URLs contain location details for secrets stored in secret managers.
+**nv** loads environment variables from `.env` files, then looks for values that are URLs with the `nv+` scheme and automatically resolves them to a real value. These URLs contain location details for secrets stored in secret managers.
 
 ```dotenv
 # .env
-DB_PASSWORD=nv://vault/kv/data/my-service?field=db-password
-VENDOR_API_KEY=nv://vault/kv/data/my-vendor?field=api-key
+DB_PASSWORD=nv+vault://kv/data/my-service?field=db-password
+VENDOR_API_KEY=nv+vault://kv/data/my-vendor?field=api-key
 ```
 
 ```dotenv
 # .env.local - easily override with static values or other managers
 DB_PASSWORD=local-db-password
-VENDOR_API_KEY=nv://1password/development/my-vendor/keys/api-key
+VENDOR_API_KEY=nv+1password://development/my-vendor/keys/api-key
 ```
 
 **nv** matches these URLs to **resolvers**, commands you define to fetch a secret using the URL, which are configured in `nv.yaml`. These commands might invoke secret manager CLI tools or custom scripts.
@@ -76,25 +76,25 @@ chmod 700 /usr/local/bin/nv
 
 ## Resolvers in depth
 
-Each resolver has a name and a command to run to resolve URLs. Commands are called once per URL, and the output of the command is used as the value. URLs are matched to resolvers by the host portion of the URL (see table below if URL portion clarity is needed).
+Each resolver has a name and a command to run to resolve URLs. Commands are called once per URL, and the output of the command is used as the value. URLs are matched to resolvers by the portion of the URL schema after `nv+`.
 
 ```yaml
 resolvers:
-  vault: vault kv get -mount="secret" -field=$NV_URL_ARG_FIELD $NV_URL_PATH
+  vault: vault kv get -mount=$NV_URL_ARG_MOUNT -field=$NV_URL_ARG_FIELD $NV_URL_PATH
   sops: sops -d --extract $NV_URL_ARG_EXTRACT $NV_URL_PATH
   1password: op read op://$NV_URL_PATH
 ```
 
 As you can see above, special environment variables are made available to access parts of the URL. These will change on each run to match the current URL being resolved.
 
-Here are all the variables provided for an example URL `nv://vault/something/or/other?field=thing`:
+Here are all the variables provided for an example URL `nv+vault://something/or/other?field=thing`:
 
-| Variable            | Value                                       |
-| ------------------- | ------------------------------------------- |
-| `$NV_URL`           | `nv://vault/something/or/other?field=thing` |
-| `$NV_URL_HOST`      | `vault`                                     |
-| `$NV_URL_PATH`      | `something/or/other`                        |
-| `$NV_URL_ARG_FIELD` | `thing`                                     |
+| Variable            | Value                                                    |
+| ------------------- | -------------------------------------------------------- |
+| `$NV_URL`           | `nv+vault://something/or/other?field=thing&mount=secret` |
+| `$NV_URL_PATH`      | `something/or/other`                                     |
+| `$NV_URL_ARG_FIELD` | `thing`                                                  |
+| `$NV_URL_ARG_MOUNT` | `secret`                                                 |
 
 `$NV_URL_ARG_*` is dynamic and one will be provided for each query arg in the URL. Arg names will be uppercased in the variable, and only the first occurrence of an arg name/value pair will be used when duplicates/conflicts occur.
 
@@ -109,6 +109,6 @@ That said, built-in resolvers for third party secret providers may be added to i
 There are a couple ways to change your resolver behavior by environment.
 
 1. You can put variables in relevant `.env` files (`.env.production`, `.env.staging`) with different values, and use that variable in your resolver command. All `.env` files will be loaded before resolvers run.
-2. If more control is needed than above, create a separate resolver entry for the different resolver versions and target the environment-appropriate resolver in the host portion of URLs in the relevant `.env` files.
+2. If more control is needed than above, create a separate resolver entry for the different resolver versions and target the environment-appropriate resolver in the relevant `.env` files.
 
 When/if configuration for resolvers becomes more complex, additional ways to manage environment overrides will likely be introduced.
