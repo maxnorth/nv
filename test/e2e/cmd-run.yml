@@ -34,3 +34,9 @@ test:
       files: *defaultFiles
       out: |
         something
+  - it: runs command in current dir even when --dir arg provided
+    with:
+      cmd: nv --dir /bin -- pwd
+      pwd: /var
+      out: |
+        /var
