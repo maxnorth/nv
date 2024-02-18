@@ -7,8 +7,11 @@ import (
 	"os"
 	"sort"
 
-	"github.com/maxnorth/nv/internal/resolver"
 	"github.com/spf13/cobra"
+	"gopkg.in/alessio/shellescape.v1"
+	"gopkg.in/yaml.v3"
+
+	"github.com/maxnorth/nv/internal/resolver"
 )
 
 func NewPrintCmd() *cobra.Command {
@@ -64,31 +67,32 @@ func printEnv(keys []string, output string) error {
 		return nil
 	}
 
-	var outputTemplate string
-	switch output {
-	case "yaml":
-		outputTemplate = "%s: \"%s\"\n"
-	case "env":
-		outputTemplate = "%s=%s\n"
-	case "shell":
-		outputTemplate = "export %s=\"%s\"\n"
+	if output == "yaml" {
+		yamlOutput, err := yaml.Marshal(values)
+		if err != nil {
+			return err
+		}
+		fmt.Print(string(yamlOutput))
+		return nil
 	}
 
-	if outputTemplate != "" {
+	if output == "shell" {
 		for _, key := range keys {
-			fmt.Printf(outputTemplate, key, values[key])
+			fmt.Printf("export %s=%s\n", key, shellescape.Quote(values[key]))
 		}
 		return nil
 	}
 
-	switch output {
-	case "keys":
-		outputTemplate = "%s\n"
+	if output == "env" {
+		for _, key := range keys {
+			fmt.Printf("%s=%s\n", key, values[key])
+		}
+		return nil
 	}
 
-	if outputTemplate != "" {
+	if output == "keys" {
 		for _, key := range keys {
-			fmt.Printf(outputTemplate, key)
+			fmt.Println(key)
 		}
 		return nil
 	}
