@@ -83,7 +83,7 @@ func runTestCase(t *testing.T, testSubject *TestSubject, testCase *TestCase) {
 	exitCode, outstr, errstr := runCommand(t, testCase.With.Cmd, testCase.With.Dir)
 
 	if exitCode != testCase.With.Exit {
-		t.Fatalf("error: actual exit code '%d' does not match expect '%d'", exitCode, testCase.With.Exit)
+		t.Fatalf("error: actual exit code '%d' does not match expected '%d'", exitCode, testCase.With.Exit)
 	}
 
 	if errstr != testCase.With.Err {

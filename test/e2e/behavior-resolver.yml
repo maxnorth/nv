@@ -1,0 +1,20 @@
+describe: behavior of resolver
+test:
+  - it: prints error when resolver type is missing
+    with:
+      cmd: nv print
+      files:
+        .env: |
+          EXAMPLE_VALUE=nv+fake://this/will/fail
+        nv.yaml: ""
+      err: |
+        Error: no resolver found for 'fake'
+  - it: prints error when resolver type is missing, plus warning for missing nv.yaml
+    with:
+      cmd: nv print
+      files:
+        .env: |
+          EXAMPLE_VALUE=nv+fake://this/will/fail
+      err: |
+        warning: no nv.yaml was found, use this to define custom resolvers
+        Error: no resolver found for 'fake'
