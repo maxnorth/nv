@@ -23,7 +23,7 @@ func Load(env string) (*Resolver, error) {
 	r := &Resolver{
 		providers:       map[string]providers.Provider{},
 		loadedProviders: map[providers.Provider]struct{}{},
-		configFound:     false,
+		configFound:     true,
 		LoadedVars:      keys,
 	}
 
