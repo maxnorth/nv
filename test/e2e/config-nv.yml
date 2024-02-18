@@ -1,7 +1,13 @@
 describe: nv.yaml config
 test:
-  - it: causes fatal error when nv.yaml is missing
+  - it: does not cause error when nv.yaml is missing
     with:
       cmd: nv print
+  - it: causes error when nv.yaml is malformed
+    with:
+      cmd: nv print
+      files:
+        nv.yaml: |
+          "unclosed string
       err: |
-        Error: nv.yaml not found
+        Error: failed to parse nv.yaml: yaml: line 2: found unexpected end of stream

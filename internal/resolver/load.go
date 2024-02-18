@@ -2,7 +2,6 @@ package resolver
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -28,10 +27,13 @@ func Load(env string) (*Resolver, error) {
 	}
 
 	yamlBytes, err := os.ReadFile("./nv.yaml")
-	if err != nil {
-		return nil, errors.New("nv.yaml not found")
+	if _, isPathErr := err.(*fs.PathError); err != nil && !isPathErr {
+		return nil, fmt.Errorf("failed to load nv.yaml: %s", err)
 	}
-	jsonBytes := yamlToJson(yamlBytes)
+	jsonBytes, err := yamlToJson(yamlBytes)
+	if err != nil {
+		return nil, err
+	}
 
 	// needs validation
 	gjson.GetBytes(jsonBytes, "resolvers").ForEach(func(key, value gjson.Result) bool {
@@ -75,16 +77,19 @@ func Load(env string) (*Resolver, error) {
 	return r, nil
 }
 
-func yamlToJson(yamlBytes []byte) []byte {
+func yamlToJson(yamlBytes []byte) ([]byte, error) {
 	var result any
-	yaml.Unmarshal(yamlBytes, &result)
+	err := yaml.Unmarshal(yamlBytes, &result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse nv.yaml: %s", err)
+	}
 
 	jsonBytes, err := json.Marshal(result)
 	if err != nil {
 		panic(err)
 	}
 
-	return jsonBytes
+	return jsonBytes, nil
 }
 
 func runDotenv(env string) ([]string, error) {

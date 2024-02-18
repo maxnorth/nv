@@ -20,10 +20,10 @@ func RootDir() string {
 	return rootDir
 }
 
-func GetColoredDiff(a, b string) string {
+func GetColoredDiff(current, expected string) string {
 	dmp := diffmatchpatch.New()
 
-	diffs := dmp.DiffMain(a, b, true)
+	diffs := dmp.DiffMain(expected, current, true)
 
 	colors := map[diffmatchpatch.Operation]string{
 		diffmatchpatch.DiffInsert: "\x1b[42m",
