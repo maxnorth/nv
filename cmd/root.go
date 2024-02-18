@@ -4,10 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
+
+var initWorkDir string
 
 func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
@@ -15,11 +18,15 @@ func NewRootCmd() *cobra.Command {
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			dir := cmd.Flag("dir").Value.String()
 			workDir, _ := os.Getwd()
-			dirPath := path.Join(workDir, dir)
+			dirPath := filepath.Join(workDir, dir)
+			if strings.HasPrefix(dir, "/") {
+				dirPath = dir
+			}
 			if err := os.Chdir(dirPath); err != nil {
 				// TODO: other kinds of errors? permission issues?
 				return fmt.Errorf("target directory not found: %s", dirPath)
 			}
+			initWorkDir = workDir
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {

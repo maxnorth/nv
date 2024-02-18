@@ -55,6 +55,7 @@ func execCommand(cobraCmd *cobra.Command, commandArgs []string) error {
 		args = commandArgs[1:]
 	}
 	cmd := exec.Command(command, args...)
+	cmd.Dir = initWorkDir
 	cmd.Stdin = cobraCmd.InOrStdin()
 	cmd.Stdout = cobraCmd.OutOrStdout()
 	cmd.Stderr = cobraCmd.ErrOrStderr()

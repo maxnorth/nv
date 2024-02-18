@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"testing"
@@ -28,7 +27,7 @@ type TestCase struct {
 
 type TestCaseDetails struct {
 	Cmd   string
-	Dir   string
+	Pwd   string
 	Files map[string]string
 	Out   string
 	Err   string
@@ -43,16 +42,6 @@ func RunTestFile(t *testing.T, fileName string) {
 			runTestCase(t, testSubject, &testCase)
 		})
 	}
-}
-
-func getTestFiles(t *testing.T) []string {
-	globTarget := path.Join(test.RootDir(), "test/e2e") + "/*.yml"
-	yamlPaths, err := filepath.Glob(globTarget)
-	if err != nil {
-		t.Fatalf("failed to glob test yaml files at path: %s", globTarget)
-	}
-
-	return yamlPaths
 }
 
 func loadTestDef(t *testing.T, filePath string) *TestSubject {
@@ -73,14 +62,14 @@ func loadTestDef(t *testing.T, filePath string) *TestSubject {
 }
 
 func runTestCase(t *testing.T, testSubject *TestSubject, testCase *TestCase) {
-	if testCase.With.Dir != "" && testCase.With.Files != nil {
-		t.Fatal("invalid test config, only one of with.dir or with.files can be set, not both")
-	} else if testCase.With.Dir == "" {
+	if testCase.With.Pwd != "" && testCase.With.Files != nil {
+		t.Fatal("invalid test config, only one of with.pwd or with.files can be set, not both")
+	} else if testCase.With.Pwd == "" {
 		tmpDir := createTmpDir(t, testCase)
-		testCase.With.Dir = tmpDir
+		testCase.With.Pwd = tmpDir
 	}
 
-	exitCode, outstr, errstr := runCommand(t, testCase.With.Cmd, testCase.With.Dir)
+	exitCode, outstr, errstr := runCommand(t, testCase.With.Cmd, testCase.With.Pwd)
 
 	if exitCode != testCase.With.Exit {
 		t.Fatalf("error: actual exit code '%d' does not match expected '%d'", exitCode, testCase.With.Exit)
@@ -111,7 +100,7 @@ func createTmpDir(t *testing.T, testCase *TestCase) string {
 	return tmpDir
 }
 
-func runCommand(t *testing.T, cmdStr, dir string) (exitCode int, outstr string, errstr string) {
+func runCommand(t *testing.T, cmdStr, pwd string) (exitCode int, outstr string, errstr string) {
 	cmdFields := strings.Fields(cmdStr)
 	cmdName, args := cmdFields[0], []string{}
 	if len(cmdFields) > 1 {
@@ -120,10 +109,10 @@ func runCommand(t *testing.T, cmdStr, dir string) (exitCode int, outstr string, 
 
 	cmd := exec.Command(cmdName, args...)
 
-	if strings.HasPrefix(dir, "/") {
-		cmd.Dir = dir
+	if strings.HasPrefix(pwd, "/") {
+		cmd.Dir = pwd
 	} else {
-		cmd.Dir = path.Join(test.RootDir(), dir)
+		cmd.Dir = path.Join(test.RootDir(), pwd)
 	}
 
 	outbuf := bytes.NewBufferString("")
@@ -131,7 +120,7 @@ func runCommand(t *testing.T, cmdStr, dir string) (exitCode int, outstr string, 
 	cmd.Stdout = outbuf
 	cmd.Stderr = errbuf
 
-	err := cmd.Run()
+	_ = cmd.Run()
 
 	outbyte, err := io.ReadAll(outbuf)
 	if err != nil {
@@ -152,7 +141,7 @@ func runCommand(t *testing.T, cmdStr, dir string) (exitCode int, outstr string, 
 
 func setPath(nvPath string) {
 	path := os.Getenv("PATH")
-	if strings.Index(path, nvPath) == -1 {
+	if !strings.Contains(path, nvPath) {
 		os.Setenv("PATH", path+":"+nvPath)
 	}
 }
