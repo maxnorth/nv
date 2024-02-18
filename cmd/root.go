@@ -16,17 +16,19 @@ func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use: "nv",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			dir := cmd.Flag("dir").Value.String()
 			workDir, _ := os.Getwd()
-			dirPath := filepath.Join(workDir, dir)
-			if strings.HasPrefix(dir, "/") {
-				dirPath = dir
-			}
-			if err := os.Chdir(dirPath); err != nil {
-				// TODO: other kinds of errors? permission issues?
-				return fmt.Errorf("target directory not found: %s", dirPath)
-			}
 			initWorkDir = workDir
+
+			dir := cmd.Flag("dir").Value.String()
+			if !strings.HasPrefix(dir, "/") {
+				dir = filepath.Join(workDir, dir)
+			}
+
+			if err := os.Chdir(dir); err != nil {
+				// TODO: other kinds of errors? permission issues?
+				return fmt.Errorf("target directory not found: %s", dir)
+			}
+
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
