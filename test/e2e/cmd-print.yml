@@ -3,6 +3,7 @@ defaultFiles: &defaultFiles
   .env: |
     EXAMPLE_VALUE=nv+echo://something/or/other
     STATIC_VALUE=this did not use a resolver
+    NUMBER_VALUE=3
   nv.yaml: |
     resolvers:
       echo: echo $NV_URL_PATH
@@ -13,14 +14,16 @@ test:
       files: *defaultFiles
       out: |
         EXAMPLE_VALUE=something/or/other
+        NUMBER_VALUE=3
         STATIC_VALUE=this did not use a resolver
   - it: can print in yaml
     with:
       cmd: nv print -o yaml
       files: *defaultFiles
       out: |
-        EXAMPLE_VALUE: "something/or/other"
-        STATIC_VALUE: "this did not use a resolver"
+        EXAMPLE_VALUE: something/or/other
+        NUMBER_VALUE: "3"
+        STATIC_VALUE: this did not use a resolver
   - it: can print in json
     with:
       cmd: nv print -o json
@@ -28,6 +31,7 @@ test:
       out: |
         {
           "EXAMPLE_VALUE": "something/or/other",
+          "NUMBER_VALUE": "3",
           "STATIC_VALUE": "this did not use a resolver"
         }
   - it: can print for shell eval
@@ -35,5 +39,14 @@ test:
       cmd: nv print -o shell
       files: *defaultFiles
       out: |
-        export EXAMPLE_VALUE="something/or/other"
-        export STATIC_VALUE="this did not use a resolver"
+        export EXAMPLE_VALUE=something/or/other
+        export NUMBER_VALUE=3
+        export STATIC_VALUE='this did not use a resolver'
+  - it: can print list of names of modified env vars
+    with:
+      cmd: nv print -o keys
+      files: *defaultFiles
+      out: |
+        EXAMPLE_VALUE
+        NUMBER_VALUE
+        STATIC_VALUE
