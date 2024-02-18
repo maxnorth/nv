@@ -23,7 +23,8 @@ func RootDir() string {
 func GetColoredDiff(current, expected string) string {
 	dmp := diffmatchpatch.New()
 
-	diffs := dmp.DiffMain(expected, current, true)
+	diffs := dmp.DiffMain(expected, current, false)
+	diffs = dmp.DiffCleanupSemantic(diffs)
 
 	colors := map[diffmatchpatch.Operation]string{
 		diffmatchpatch.DiffInsert: "\x1b[42m",

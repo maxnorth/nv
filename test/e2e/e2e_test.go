@@ -25,3 +25,7 @@ func Test_E2E_Print(t *testing.T) {
 func Test_E2E_Run(t *testing.T) {
 	e2e.RunTestFile(t, "cmd-run.yml")
 }
+
+func Test_E2E_Resolver(t *testing.T) {
+	e2e.RunTestFile(t, "behavior-resolver.yml")
+}

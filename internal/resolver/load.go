@@ -23,13 +23,17 @@ func Load(env string) (*Resolver, error) {
 	r := &Resolver{
 		providers:       map[string]providers.Provider{},
 		loadedProviders: map[providers.Provider]struct{}{},
+		configFound:     false,
 		LoadedVars:      keys,
 	}
 
 	yamlBytes, err := os.ReadFile("./nv.yaml")
 	if _, isPathErr := err.(*fs.PathError); err != nil && !isPathErr {
 		return nil, fmt.Errorf("failed to load nv.yaml: %s", err)
+	} else if err != nil {
+		r.configFound = false
 	}
+
 	jsonBytes, err := yamlToJson(yamlBytes)
 	if err != nil {
 		return nil, err
