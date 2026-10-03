@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="Run nv from source in the caller's directory"
+#MISE raw=true
+set -euo pipefail
+
+export NV_DEV_CWD="${NV_DEV_CWD:-${MISE_ORIGINAL_CWD:-$PWD}}"
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$root"
+exec go run -exec "$root/.mise/run-in-caller-dir" . "$@"

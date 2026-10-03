@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+program="$1"
+shift
+if [[ "$program" != /* ]]; then
+  program="$(cd -- "$(dirname -- "$program")" && pwd)/$(basename -- "$program")"
+fi
+caller="${NV_DEV_CWD:-${MISE_ORIGINAL_CWD:-$PWD}}"
+cd "$caller"
+unset NV_DEV_CWD
+exec "$program" "$@"

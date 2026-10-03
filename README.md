@@ -112,3 +112,7 @@ There are a couple ways to change your resolver behavior by environment.
 2. If more control is needed than above, create a separate resolver entry for the different resolver versions and target the environment-appropriate resolver in the relevant `.env` files.
 
 When/if configuration for resolvers becomes more complex, additional ways to manage environment overrides will likely be introduced.
+
+## Development (mise)
+
+Run `mise run setup` to install Go and watchexec, download modules, and build `dist/nv`. `mise run build` rebuilds the artifact; `mise dev` builds and watches Go sources for changes. `mise run test` builds and runs the test suite. Activate the mise environment with `eval "$(mise env -s bash)"` to put `dist/` on `PATH`, so `nv` invokes the built artifact. `mise run run -- <args...>` runs the CLI from source in your current directory, and `mise run install` installs the artifact under `${NV_INSTALL_DIR:-$HOME/.local/bin}`. `mise run release` builds binaries for all platforms.

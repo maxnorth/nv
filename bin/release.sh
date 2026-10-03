@@ -1,4 +1,4 @@
-#! bash
+#!/usr/bin/env bash
 
 OS_TARGETS=( darwin linux )
 ARCH_TARGETS=( amd64 arm64 )
