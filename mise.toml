@@ -1,0 +1,44 @@
+[tools]
+go = "1.27"
+watchexec = "latest"
+
+[env]
+_.path = ["{{config_root}}/dist"]
+
+[tasks.setup]
+description = "Install project tools and download Go modules"
+run = ["mise install", "go mod download", "mise run build"]
+
+[tasks.build]
+description = "Build the nv CLI"
+sources = ["*.go", "cmd/**/*.go", "internal/**/*.go", "go.mod", "go.sum"]
+outputs = ["dist/nv"]
+run = "mkdir -p dist && go build -o dist/nv main.go"
+
+[tasks.dev]
+description = "Build the CLI and watch source files for changes"
+run = "mise watch build"
+
+[tasks.test]
+description = "Build the CLI and run all tests"
+depends = ["build"]
+run = "go test ./..."
+
+[tasks.install]
+description = "Build and install nv globally"
+depends = ["build"]
+run = '''
+set -eu
+install_dir="${NV_INSTALL_DIR:-$HOME/.local/bin}"
+mkdir -p "$install_dir"
+cp dist/nv "$install_dir/nv"
+printf 'Installed nv to %s\n' "$install_dir/nv"
+case ":$PATH:" in
+  *":$install_dir:"*) ;;
+  *) printf 'Warning: %s is not on PATH\n' "$install_dir" >&2 ;;
+esac
+'''
+
+[tasks.release]
+description = "Build release binaries for all platforms into dist/"
+run = "rm -rf dist && bash bin/release.sh"
